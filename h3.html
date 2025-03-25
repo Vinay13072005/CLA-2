@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.5s ease-in-out;
+        }
+        .container {
+            max-width: 500px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #ff7eb3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #ff4e90;
+        }
+        #weather {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .forecast-container {
+            max-width: 500px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body id="weather-body">
+    <div class="container">
+        <h2>Weather App</h2>
+        <input type="text" id="city" placeholder="Enter city name">
+        <button onclick="getWeather()">Get Weather</button>
+        <h3 id="weather"></h3>
+    </div>
+    
+    <div class="forecast-container">
+        <h2>5-Day Forecast</h2>
+        <div id="forecast"></div>
+    </div>
+
+    <script>
+        async function getWeather() {
+            const apiKey = '297fb03bf4dab10e0d8c969ec45a128c'; 
+            const city = document.getElementById('city').value.trim().toLowerCase();
+            if (!city) {
+                alert('Please enter a city name');
+                return;
+            }
+            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+            const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`;
+            try {
+                const weatherResponse = await fetch(weatherUrl);
+                const weatherData = await weatherResponse.json();
+                
+                const forecastResponse = await fetch(forecastUrl);
+                const forecastData = await forecastResponse.json();
+                
+                if (weatherData.cod == "200") {
+                    document.getElementById('weather').innerText = `Current: ${weatherData.main.temp}°C, ${weatherData.weather[0].description}`;
+                    changeBackground(weatherData.weather[0].main);
+                } else {
+                    document.getElementById('weather').innerText = `${weatherData.message}`;
+                }
+                
+                if (forecastData.cod == "200") {
+                    const dailyForecast = forecastData.list.filter((item, index) => index % 8 === 0).slice(0, 5);
+                    let forecastHTML = "";
+                    dailyForecast.forEach(day => {
+                        forecastHTML += `<p><strong>${new Date(day.dt_txt).toDateString()}</strong>: ${day.main.temp}°C, ${day.weather[0].description}</p>`;
+                    });
+                    document.getElementById('forecast').innerHTML = forecastHTML;
+                }
+            } catch (error) {
+                document.getElementById('weather').innerText = 'Error fetching data';
+            }
+        }
+
+        function changeBackground(weatherCondition) {
+    const body = document.getElementById('weather-body');
+    
+    const weatherImages = {
+        Clear: 'url("clear.jpg")',
+        Clouds: 'url("cloudy.jpg")',
+        Rain: 'url("Rainy.jpg")',
+        Thunderstorm: 'url("thunderstorm.jpg")',
+        Snow: 'url("snow.jpg")',
+        Mist: 'url("mist.jpg")',
+        Haze: 'url("haze.jpg")',
+    };
+    body.style.background = weatherImages[weatherCondition] || 'url("default.jpg")';
+    body.style.backgroundSize = "cover";
+    body.style.backgroundPosition = "center";
+}
+
+    </script>
+</body>
+</html>
