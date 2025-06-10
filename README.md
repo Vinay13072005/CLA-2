@@ -1,4 +1,3 @@
-# CLA-2
 
 # Weather App
 
